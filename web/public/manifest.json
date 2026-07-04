@@ -1,0 +1,17 @@
+{
+  "short_name": "CropAI",
+  "name": "CropAI - Plant Disease Detection",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#020617",
+  "background_color": "#020617",
+  "description": "Instantly detect crop diseases with AI.",
+  "orientation": "portrait-primary"
+}

@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - FIREBASE_CREDENTIALS=/app/firebase-credentials.json
+      - AWS_REGION=${AWS_REGION:-ap-south-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-cropai-v2-scans}
+      - DYNAMODB_TABLE_NAME=${DYNAMODB_TABLE_NAME:-CropAI_Scans}
+    volumes:
+      # Mount credentials if testing locally
+      - ./backend/cropai-v2-firebase-adminsdk-fbsvc-71492568ba.json:/app/firebase-credentials.json:ro
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend

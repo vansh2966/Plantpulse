@@ -1,0 +1,7 @@
+*cropai-v2-firebase-adminsdk-fbsvc-71492568ba*.json
+firebase-credentials*.json
+venv/
+__pycache__/
+*.pt
+*.onnx
+.env
