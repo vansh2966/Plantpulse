@@ -45,3 +45,7 @@ backend/cropai-v2-firebase-adminsdk*.json
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Internal Documentation
+PROJECT_STATUS.md
+DEPLOYMENT.md
