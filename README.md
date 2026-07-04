@@ -1,4 +1,4 @@
-<div align="center">
+<img width="3792" height="1992" alt="W B Chart 7_4_2026, 12_34_39 PM" src="https://github.com/user-attachments/assets/7eff64fc-6a7f-4d7e-af07-ceb1f299369e" /><div align="center">
   <h1>🌱 Plantpulse</h1>
   <p>An AI-powered cross-platform (Web & Mobile) crop disease diagnosis and treatment ecosystem.</p>
   <br />
@@ -136,11 +136,17 @@ The model was trained on a highly robust dataset containing **94 classes** of he
 
 ## 📊 Training Metrics (Weights & Biases)
 
-*(Note to Developer: Drop your W&B training metric charts here! You can drag and drop your Loss and Accuracy curves directly into this section.)*
-
 <!-- Paste W&B Images Here -->
 - **Training Loss / Validation Loss:**
-- **Training Accuracy / Validation Accuracy:** 
+- ![Up<img width="3792" height="1992" alt="W B Chart 7_4_2026, 12_34_51 PM" src="https://github.com/user-attachments/assets/b762b95e-bd1f-40a6-9a80-24ef8e81710c" />
+
+- <img width="3792" height="1992" alt="W B Chart 7_4_2026, 12_34_39 PM" src="https://github.com/user-attachments/assets/cefa99f5-d977-4950-ba27-64953084df17" />
+
+- **Training Accuracy / Validation Accuracy:**
+- <img width="3792" height="1992" alt="W B Chart 7_4_2026, 12_39_07 PM" src="https://github.com/user-attachments/assets/0cbf4ef4-e0a1-499b-8094-f7c97c86c670" />
+
+-<img width="3792" height="1992" alt="W B Chart 7_4_2026, 12_38_51 PM" src="https://github.com/user-attachments/assets/74feebe0-c27e-4d5d-ac77-c066f1eed65c" />
+
 
 ---
 
@@ -189,4 +195,4 @@ To run this project locally, you must provide your own `.env` files.
 * **Frontend/Mobile:** Requires Firebase Web Client configuration keys.
 
 ---
-*Built with ❤️ for modern agriculture.*
+*Built with for modern agriculture.*
