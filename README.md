@@ -138,14 +138,15 @@ The model was trained on a highly robust dataset containing **94 classes** of he
 
 <!-- Paste W&B Images Here -->
 - **Training Loss / Validation Loss:**
-- ![Up<img width="3792" height="1992" alt="W B Chart 7_4_2026, 12_34_51 PM" src="https://github.com/user-attachments/assets/b762b95e-bd1f-40a6-9a80-24ef8e81710c" />
+- <img width="3792" height="1992" alt="W B Chart 7_4_2026, 12_34_51 PM" src="https://github.com/user-attachments/assets/b762b95e-bd1f-40a6-9a80-24ef8e81710c" />
 
 - <img width="3792" height="1992" alt="W B Chart 7_4_2026, 12_34_39 PM" src="https://github.com/user-attachments/assets/cefa99f5-d977-4950-ba27-64953084df17" />
 
 - **Training Accuracy / Validation Accuracy:**
+-<img width="3792" height="1992" alt="W B Chart 7_4_2026, 12_38_51 PM" src="https://github.com/user-attachments/assets/74feebe0-c27e-4d5d-ac77-c066f1eed65c" />
+
 - <img width="3792" height="1992" alt="W B Chart 7_4_2026, 12_39_07 PM" src="https://github.com/user-attachments/assets/0cbf4ef4-e0a1-499b-8094-f7c97c86c670" />
 
--<img width="3792" height="1992" alt="W B Chart 7_4_2026, 12_38_51 PM" src="https://github.com/user-attachments/assets/74feebe0-c27e-4d5d-ac77-c066f1eed65c" />
 
 
 ---
