@@ -5,7 +5,7 @@ import AdvicePanel from '../components/AdvicePanel';
 import { useToast } from '../components/Toast';
 import { SkeletonLoader } from '../components/SkeletonLoader';
 import api from '../services/api';
-import type { PredictResponse } from '../../../shared/types/prediction';
+import type { PredictResponse } from '@plantpulse/shared/types/prediction';
 
 const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);

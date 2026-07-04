@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Camera, Image as ImageIcon, X } from 'lucide-react-native';
 import api from '../services/api';
-import { PredictResponse } from '../../../shared/types/prediction';
+import { PredictResponse } from '@plantpulse/shared/types/prediction';
 import AdvicePanel from '../components/AdvicePanel';
 import ConfidenceGauge from '../components/ConfidenceGauge';
 import CameraOverlay from '../components/CameraOverlay';

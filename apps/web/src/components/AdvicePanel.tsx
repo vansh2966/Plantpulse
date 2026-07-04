@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { Advice } from '../../../shared/types/prediction';
+import type { Advice } from '@plantpulse/shared/types/prediction';
 import { Droplet, Leaf, Shield, Scissors } from 'lucide-react';
 
 interface AdvicePanelProps {

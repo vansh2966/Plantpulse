@@ -77,7 +77,7 @@ graph TD
     API -- JSON Response + Advice --> W
 ```
 
-### 1. `backend/` (FastAPI)
+### 1. `apps/api/` (FastAPI)
 The core intelligence engine and API server.
 - **ML Inference:** Uses **ONNX Runtime (CPU)** for blazing-fast predictions (sub-100ms inference).
 - **Grad-CAM Visualization:** Dynamically falls back to **PyTorch** to generate visual gradient class activation maps (Grad-CAM), showing users *exactly* where the model detected the disease on the leaf.
@@ -85,12 +85,12 @@ The core intelligence engine and API server.
 - **Cloud Storage & Logging:** Uses **AWS S3** (`boto3`) to store incoming leaf images and **DynamoDB** to log scan history.
 - **Dynamic Knowledge Base:** Serves automated agricultural advice retrieved from an auto-generated JSON knowledge base.
 
-### 2. `web/` (React + Vite + TailwindCSS)
+### 2. `apps/web/` (React + Vite + TailwindCSS)
 The responsive web dashboard for desktop and mobile browsers.
 - Integrates Firebase JS SDK for seamless Google Sign-in.
 - Uses Tailwind CSS for a premium, glassmorphic UI.
 
-### 3. `mobile/` (React Native + Expo)
+### 3. `apps/mobile/` (React Native + Expo)
 The native iOS and Android application.
 - Uses `expo-camera` and `expo-image-picker` for native hardware integration.
 - Persists user sessions via `AsyncStorage` and securely communicates with the backend via a pre-configured Axios client.
@@ -130,7 +130,7 @@ The model was trained on a highly robust dataset containing **94 classes** of he
 ### How We Did It
 1. **Training Environment:** The model was trained headlessly using PyTorch in a Kaggle environment. We used Hugging Face Datasets for high-speed streaming and Weights & Biases (W&B) for silent metric logging.
 2. **ONNX Export:** To achieve lightning-fast CPU inference on the backend, we traced the PyTorch model (`.pt`) and exported it into a highly-optimized **ONNX computation graph**.
-3. **Automated Knowledge:** We wrote a custom pipeline (`backend/scripts/generate_knowledge.py`) that utilizes Google's Gemini API to automatically crawl and generate personalized treatment advice, nutrient requirements, and pruning guidelines for all 94 classes, outputting a static JSON file for the backend to consume instantly.
+3. **Automated Knowledge:** We wrote a custom pipeline (`apps/api/scripts/generate_knowledge.py`) that utilizes Google's Gemini API to automatically crawl and generate personalized treatment advice, nutrient requirements, and pruning guidelines for all 94 classes, outputting a static JSON file for the backend to consume instantly.
 
 ---
 
@@ -156,15 +156,15 @@ The model was trained on a highly robust dataset containing **94 classes** of he
 The raw PyTorch weights (`.pt`) and the optimized ONNX graph (`.onnx`) exceed GitHub's 100MB file limit. 
 
 Therefore, the models are securely packaged and attached to the **GitHub Releases** page of this repository. 
-You can download `Plantpulse_Models_v1.zip` from the Releases section and extract it directly into the `backend/app/ml/weights/` directory.
+You can download `Plantpulse_Models_v1.zip` from the Releases section and extract it directly into the `apps/api/app/ml/weights/` directory.
 
 ---
 
 ## 🛠️ Setup & Installation
 
-### Backend
+### API / Backend
 ```bash
-cd backend
+cd apps/api
 python -m venv venv
 # Windows
 .\venv\Scripts\activate
@@ -178,14 +178,14 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 ### Web
 ```bash
-cd web
+cd apps/web
 npm install
 npm run dev
 ```
 
 ### Mobile
 ```bash
-cd mobile
+cd apps/mobile
 npm install
 npx expo start
 ```

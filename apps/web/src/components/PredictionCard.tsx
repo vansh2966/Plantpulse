@@ -1,6 +1,6 @@
 import React from 'react';
 import ConfidenceBar from './ConfidenceBar';
-import type { PredictionResult } from '../../../shared/types/prediction';
+import type { PredictionResult } from '@plantpulse/shared/types/prediction';
 import { AlertCircle } from 'lucide-react';
 
 interface PredictionCardProps {

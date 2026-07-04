@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import api from '../services/api';
-import { ScanHistoryItem, ScanHistoryResponse } from '../../../shared/types/prediction';
+import { ScanHistoryItem, ScanHistoryResponse } from '@plantpulse/shared/types/prediction';
 import { Trash2, Leaf } from 'lucide-react-native';
 
 const HistoryScreen = ({ navigation }: any) => {

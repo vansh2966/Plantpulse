@@ -1,0 +1,7 @@
+{
+  "name": "@plantpulse/shared",
+  "version": "1.0.0",
+  "description": "Shared code for Plantpulse",
+  "main": "types/prediction.ts",
+  "private": true
+}

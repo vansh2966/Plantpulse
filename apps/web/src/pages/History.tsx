@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import type { ScanHistoryItem, ScanHistoryResponse } from '../../../shared/types/prediction';
+import type { ScanHistoryItem, ScanHistoryResponse } from '@plantpulse/shared/types/prediction';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Calendar, Leaf, Trash2 } from 'lucide-react';
 import { SkeletonLoader } from '../components/SkeletonLoader';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Activity, ShieldAlert, FlaskConical } from 'lucide-react-native';
-import type { TreatmentAdvice } from '../../../../shared/types/prediction';
+import type { TreatmentAdvice } from '@plantpulse/shared/types/prediction';
 
 interface AdvicePanelProps {
   advice: TreatmentAdvice;
