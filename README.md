@@ -1,4 +1,4 @@
- /><div align="center">
+  <div align="center">
   <h1>🌱 Plantpulse</h1>
   <p>An AI-powered cross-platform (Web & Mobile) crop disease diagnosis and treatment ecosystem.</p>
   <br />
