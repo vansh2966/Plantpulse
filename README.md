@@ -1,4 +1,4 @@
-<img width="3792" height="1992" alt="W B Chart 7_4_2026, 12_34_39 PM" src="https://github.com/user-attachments/assets/7eff64fc-6a7f-4d7e-af07-ceb1f299369e" /><div align="center">
+ /><div align="center">
   <h1>🌱 Plantpulse</h1>
   <p>An AI-powered cross-platform (Web & Mobile) crop disease diagnosis and treatment ecosystem.</p>
   <br />
