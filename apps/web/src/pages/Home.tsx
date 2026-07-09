@@ -6,6 +6,27 @@ import { useToast } from '../components/Toast';
 import { SkeletonLoader } from '../components/SkeletonLoader';
 import api from '../services/api';
 import type { PredictResponse } from '@plantpulse/shared/types/prediction';
+import { Zap, Shield, Eye, Leaf } from 'lucide-react';
+
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  delay: number;
+}
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, delay }) => (
+  <div 
+    className="glass-card p-6 text-center group hover:border-emerald-500/30 transition-all duration-300 animate-slide-up"
+    style={{ animationDelay: `${delay}ms` }}
+  >
+    <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all duration-300">
+      {icon}
+    </div>
+    <h3 className="text-white font-semibold mb-2">{title}</h3>
+    <p className="text-sm text-slate-400 leading-relaxed">{description}</p>
+  </div>
+);
 
 const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -46,8 +67,12 @@ const Home: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full text-sm font-medium ring-1 ring-emerald-500/20 mb-6 animate-fade-in">
+            <Leaf size={14} />
+            AI-Powered Plant Diagnosis
+          </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">
-            CropAI Diagnosis
+            PlantPulse Diagnosis
           </h1>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
             Upload a photo of a diseased plant leaf and instantly receive an AI-powered diagnosis and treatment plan.
@@ -78,6 +103,30 @@ const Home: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Feature Cards — shown when no result */}
+        {!result && !isLoading && (
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <FeatureCard
+              icon={<Zap size={24} />}
+              title="Instant Analysis"
+              description="Get accurate disease diagnosis in under 2 seconds using state-of-the-art deep learning."
+              delay={100}
+            />
+            <FeatureCard
+              icon={<Shield size={24} />}
+              title="94 Diseases Covered"
+              description="Trained on major crop diseases worldwide with treatment plans for each condition."
+              delay={200}
+            />
+            <FeatureCard
+              icon={<Eye size={24} />}
+              title="Visual Explainability"
+              description="See exactly where the AI detected disease with Grad-CAM heatmap visualization."
+              delay={300}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

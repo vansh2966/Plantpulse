@@ -67,4 +67,5 @@ export interface ScanHistoryItem {
 
 export interface ScanHistoryResponse {
   scans: ScanHistoryItem[];
+  total: number;
 }

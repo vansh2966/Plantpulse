@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 from torch.utils.data import DataLoader, Dataset
 from torchvision import models, transforms
 from tqdm import tqdm
@@ -59,6 +60,7 @@ CONFIG = {
     "weights_save_path": "convnext_tiny_plantdisease.pt",
     "use_wandb": USE_WANDB,
     "wandb_project": "cropai-v2",
+    "grad_clip_max_norm": 1.0,
 }
 
 # ==========================================
@@ -121,17 +123,60 @@ class HFDatasetWrapper(Dataset):
         return image, label
 
 # ==========================================
-# 4. Model Architecture & Loss (Copied from backend)
+# 4. Model Architecture & Loss
 # ==========================================
-class SpatialAttention(nn.Module):
-    def __init__(self, in_channels: int):
+# Uses the shared architecture from app.ml.network
+# Duplicated here ONLY for Kaggle where app.ml isn't importable.
+# KEEP IN SYNC with apps/api/app/ml/network.py
+
+class ChannelAttention(nn.Module):
+    """Squeeze-and-Excitation style channel attention."""
+    def __init__(self, in_channels: int, reduction: int = 16):
         super().__init__()
-        self.conv = nn.Conv2d(in_channels, 1, kernel_size=1)
+        mid = max(in_channels // reduction, 1)
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.max_pool = nn.AdaptiveMaxPool2d(1)
+        self.fc = nn.Sequential(
+            nn.Conv2d(in_channels, mid, 1, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(mid, in_channels, 1, bias=False),
+        )
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        attention_map = self.sigmoid(self.conv(x))
+        avg_out = self.fc(self.avg_pool(x))
+        max_out = self.fc(self.max_pool(x))
+        return x * self.sigmoid(avg_out + max_out)
+
+
+class SpatialAttention(nn.Module):
+    """7x7 conv spatial attention — learns WHERE to look."""
+    def __init__(self, kernel_size: int = 7):
+        super().__init__()
+        padding = kernel_size // 2
+        self.conv = nn.Conv2d(2, 1, kernel_size, padding=padding, bias=False)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        avg_out = torch.mean(x, dim=1, keepdim=True)
+        max_out, _ = torch.max(x, dim=1, keepdim=True)
+        combined = torch.cat([avg_out, max_out], dim=1)
+        attention_map = self.sigmoid(self.conv(combined))
         return x * attention_map
+
+
+class CBAM(nn.Module):
+    """CBAM: Channel + Spatial attention for disease localization."""
+    def __init__(self, in_channels: int, reduction: int = 16):
+        super().__init__()
+        self.channel_attention = ChannelAttention(in_channels, reduction)
+        self.spatial_attention = SpatialAttention()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.channel_attention(x)
+        x = self.spatial_attention(x)
+        return x
+
 
 class CropDiseaseModel(nn.Module):
     def __init__(self, num_classes: int, pretrained: bool = True):
@@ -141,20 +186,22 @@ class CropDiseaseModel(nn.Module):
         
         self.features = base_model.features
         
-        # Unfreeze backbone for end-to-end training
+        # Unfreeze backbone for end-to-end training in Kaggle
         for param in self.features.parameters():
             param.requires_grad = True
             
         in_features = 768
         
-        self.attention = SpatialAttention(in_channels=in_features)
+        self.attention = CBAM(in_channels=in_features)
         self.pool = nn.AdaptiveAvgPool2d((1, 1))
         
         self.classifier = nn.Sequential(
             nn.Flatten(),
             nn.LayerNorm(in_features),
-            nn.Dropout(p=0.3),
-            nn.Linear(in_features, num_classes)
+            nn.Linear(in_features, 512),
+            nn.GELU(),
+            nn.Dropout(p=0.4),
+            nn.Linear(512, num_classes),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -239,10 +286,11 @@ def train_model():
     train_loader = DataLoader(train_dataset, batch_size=CONFIG["batch_size"], shuffle=True, num_workers=2, pin_memory=True)
     val_loader = DataLoader(val_dataset, batch_size=CONFIG["batch_size"], shuffle=False, num_workers=2, pin_memory=True)
 
-    # Model, Loss, Optimizer
+    # Model, Loss, Optimizer, Scheduler
     model = build_model(num_classes, pretrained=True).to(device)
     criterion = FocalLoss(gamma=2.0)
     optimizer = optim.AdamW(model.parameters(), lr=CONFIG["learning_rate"], weight_decay=CONFIG["weight_decay"])
+    scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=5, T_mult=2)
 
     best_val_acc = 0.0
 
@@ -255,7 +303,7 @@ def train_model():
         running_loss = 0.0
         running_corrects = 0
 
-        for inputs, labels in tqdm(train_loader, desc="Training"):
+        for batch_idx, (inputs, labels) in enumerate(tqdm(train_loader, desc="Training")):
             inputs = inputs.to(device)
             labels = labels.to(device)
 
@@ -265,7 +313,12 @@ def train_model():
             _, preds = torch.max(outputs, 1)
 
             loss.backward()
+            # Gradient clipping to prevent explosion
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=CONFIG["grad_clip_max_norm"])
             optimizer.step()
+            
+            # Step scheduler per batch for warm restarts
+            scheduler.step(epoch + batch_idx / len(train_loader))
 
             running_loss += loss.item() * inputs.size(0)
             running_corrects += torch.sum(preds == labels.data)
@@ -293,8 +346,10 @@ def train_model():
         val_loss = val_loss / len(val_dataset)
         val_acc = val_corrects.double() / len(val_dataset)
 
+        current_lr = optimizer.param_groups[0]['lr']
         print(f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f}")
         print(f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f}")
+        print(f"Learning Rate: {current_lr:.6f}")
 
         if CONFIG["use_wandb"]:
             wandb.log({
@@ -302,7 +357,8 @@ def train_model():
                 "train_loss": train_loss,
                 "train_acc": train_acc,
                 "val_loss": val_loss,
-                "val_acc": val_acc
+                "val_acc": val_acc,
+                "learning_rate": current_lr,
             })
 
         # Save Best Model
@@ -313,7 +369,9 @@ def train_model():
                 "class_names": class_names,
             }
             torch.save(checkpoint, CONFIG["weights_save_path"])
-            print(f"Saved new best model to {CONFIG['weights_save_path']}")
+            print(f"Saved new best model to {CONFIG['weights_save_path']} (Val Acc: {val_acc:.4f})")
+
+    print(f"\nTraining complete! Best Val Acc: {best_val_acc:.4f}")
 
     if CONFIG["use_wandb"]:
         wandb.finish()

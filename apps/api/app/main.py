@@ -14,8 +14,8 @@ if settings.SENTRY_DSN:
     sentry_sdk.init(
         dsn=settings.SENTRY_DSN,
         environment=settings.ENVIRONMENT,
-        traces_sample_rate=1.0,
-        profiles_sample_rate=1.0,
+        traces_sample_rate=0.1 if settings.ENVIRONMENT == "production" else 0.0,
+        profiles_sample_rate=0.1 if settings.ENVIRONMENT == "production" else 0.0,
     )
 
 logger = structlog.get_logger()

@@ -1,5 +1,7 @@
+import io
 from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
 from datetime import datetime, timezone
+from PIL import Image, UnidentifiedImageError
 from app.schemas.predict import PredictResponse, PredictionResult, PredictionClass, ScanResult
 from app.services.inference import inference_service
 from app.services.knowledge import knowledge_service
@@ -14,15 +16,13 @@ async def predict_image(
     image: UploadFile = File(...),
     token_data: dict = Depends(verify_firebase_token)
 ):
-    if not image.content_type.startswith("image/"):
+    if not image.content_type or not image.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File provided is not an image.")
     
     try:
         contents = await image.read()
         
         # Validate dimensions
-        import io
-        from PIL import Image, UnidentifiedImageError
         try:
             with Image.open(io.BytesIO(contents)) as img:
                 width, height = img.size
@@ -53,7 +53,7 @@ async def predict_image(
         uid = token_data.get("uid")
         image_url = storage_service.upload_scan_image(uid, contents, image.content_type)
         
-        # Log scan to Firestore
+        # Log scan to DynamoDB
         prediction_data = {
             "class_name": prediction.class_name,
             "confidence": prediction.confidence,
@@ -70,5 +70,7 @@ async def predict_image(
                 timestamp=datetime.now(timezone.utc).isoformat()
             )
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

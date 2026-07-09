@@ -127,7 +127,7 @@ const Dashboard: React.FC = () => {
                 <p className="text-slate-400 text-center py-8">No scans yet. Start scanning to see statistics!</p>
               ) : (
                 <div className="space-y-4">
-                  {stats.top_diseases.map((disease, index) => {
+                  {stats.top_diseases.map((disease) => {
                     const maxCount = stats.top_diseases[0]?.count || 1;
                     const widthPercent = Math.max((disease.count / maxCount) * 100, 5);
                     

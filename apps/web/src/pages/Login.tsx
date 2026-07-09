@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { auth } from '../config/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { Leaf } from 'lucide-react';
 import { useToast } from '../components/Toast';
 
 const Login: React.FC = () => {

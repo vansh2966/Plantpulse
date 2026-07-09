@@ -32,9 +32,9 @@ const Navbar: React.FC = () => {
         {/* Logo */}
         <div className="flex-shrink-0 flex items-center">
           <Link to="/" className="flex items-center space-x-2">
-            <img src="/logo.png" alt="PlantPlus Logo" className="h-8 w-8 rounded-lg" />
+            <img src="/logo.png" alt="PlantPulse Logo" className="h-8 w-8 rounded-lg" />
             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-500">
-              PlantPlus
+              PlantPulse
             </span>
           </Link>
         </div>

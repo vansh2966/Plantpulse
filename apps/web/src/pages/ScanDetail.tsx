@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ChevronLeft, Trash2, Eye } from 'lucide-react';
+import { ChevronLeft, Trash2, Eye, SlidersHorizontal } from 'lucide-react';
 import { SkeletonLoader } from '../components/SkeletonLoader';
 import { useToast } from '../components/Toast';
 import ConfidenceBar from '../components/ConfidenceBar';
@@ -23,22 +23,19 @@ const ScanDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [gradcamUrl, setGradcamUrl] = useState<string | null>(null);
   const [isGeneratingGradcam, setIsGeneratingGradcam] = useState(false);
-  const [showGradcam, setShowGradcam] = useState(false);
+  const [sliderPos, setSliderPos] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     const fetchScan = async () => {
       try {
-        const response = await api.get(`/scans?limit=100`);
-        const found = response.data.scans.find((s: ScanData) => s.id === scanId);
-        if (found) {
-          setScan(found);
-        } else {
-          showToast('Scan not found', 'error');
-          navigate('/history');
-        }
+        // Use dedicated single-scan endpoint instead of fetching all scans
+        const response = await api.get(`/scans/${scanId}`);
+        setScan(response.data);
       } catch (error) {
         console.error('Failed to fetch scan:', error);
-        showToast('Failed to load scan details', 'error');
+        showToast('Scan not found', 'error');
+        navigate('/history');
       } finally {
         setIsLoading(false);
       }
@@ -71,13 +68,22 @@ const ScanDetail: React.FC = () => {
 
       const url = URL.createObjectURL(gradcamResponse.data);
       setGradcamUrl(url);
-      setShowGradcam(true);
+      setSliderPos(50);
     } catch (error) {
       showToast('GradCAM generation failed. Model may not be loaded.', 'warning');
     } finally {
       setIsGeneratingGradcam(false);
     }
   };
+
+  // Draggable comparison slider handlers
+  const handleSliderInteraction = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    const container = (e.currentTarget as HTMLElement);
+    const rect = container.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const pos = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    setSliderPos(pos);
+  }, []);
 
   if (isLoading) {
     return (
@@ -93,7 +99,7 @@ const ScanDetail: React.FC = () => {
 
   if (!scan) return null;
 
-  const displayName = scan.class_name.replace("___", " — ").replace(/_/g, " ");
+  const displayName = scan.class_name.replace(/___/g, " — ").replace(/_/g, " ");
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 animate-fade-in relative overflow-hidden">
@@ -120,15 +126,61 @@ const ScanDetail: React.FC = () => {
           {/* Image Section */}
           <div className="glass-card overflow-hidden">
             <div className="relative">
-              <img 
-                src={showGradcam && gradcamUrl ? gradcamUrl : scan.image_url} 
-                alt="Scan" 
-                className="w-full aspect-square object-cover"
-              />
-              {showGradcam && (
-                <div className="absolute top-3 left-3 bg-emerald-500/80 text-white text-xs font-medium px-2 py-1 rounded-md backdrop-blur-sm">
-                  Grad-CAM View
+              {gradcamUrl ? (
+                /* GradCAM Comparison Slider */
+                <div
+                  className="relative w-full aspect-square cursor-col-resize select-none overflow-hidden"
+                  onMouseDown={() => setIsDragging(true)}
+                  onMouseUp={() => setIsDragging(false)}
+                  onMouseLeave={() => setIsDragging(false)}
+                  onMouseMove={(e) => isDragging && handleSliderInteraction(e)}
+                  onClick={handleSliderInteraction}
+                  onTouchMove={handleSliderInteraction}
+                >
+                  {/* Original Image (background) */}
+                  <img
+                    src={scan.image_url}
+                    alt="Original Scan"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    draggable={false}
+                  />
+                  {/* GradCAM overlay (clipped by slider position) */}
+                  <div
+                    className="absolute inset-0 overflow-hidden"
+                    style={{ width: `${sliderPos}%` }}
+                  >
+                    <img
+                      src={gradcamUrl}
+                      alt="Grad-CAM Heatmap"
+                      className="w-full h-full object-cover"
+                      style={{ width: `${100 * 100 / Math.max(sliderPos, 1)}%`, maxWidth: 'none' }}
+                      draggable={false}
+                    />
+                  </div>
+                  {/* Slider line */}
+                  <div
+                    className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg shadow-black/50 z-10"
+                    style={{ left: `${sliderPos}%` }}
+                  >
+                    <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center">
+                      <SlidersHorizontal size={14} className="text-slate-800" />
+                    </div>
+                  </div>
+                  {/* Labels */}
+                  <div className="absolute top-3 left-3 bg-emerald-500/80 text-white text-xs font-medium px-2 py-1 rounded-md backdrop-blur-sm z-20">
+                    Grad-CAM
+                  </div>
+                  <div className="absolute top-3 right-3 bg-slate-800/80 text-white text-xs font-medium px-2 py-1 rounded-md backdrop-blur-sm z-20">
+                    Original
+                  </div>
                 </div>
+              ) : (
+                /* Plain image (no GradCAM yet) */
+                <img 
+                  src={scan.image_url} 
+                  alt="Scan" 
+                  className="w-full aspect-square object-cover"
+                />
               )}
             </div>
 
@@ -147,14 +199,6 @@ const ScanDetail: React.FC = () => {
                   </>
                 )}
               </button>
-              {gradcamUrl && (
-                <button
-                  onClick={() => setShowGradcam(!showGradcam)}
-                  className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white font-medium rounded-xl transition-all ring-1 ring-white/10"
-                >
-                  {showGradcam ? 'Original' : 'Heatmap'}
-                </button>
-              )}
             </div>
           </div>
 
@@ -179,7 +223,7 @@ const ScanDetail: React.FC = () => {
                   {scan.top_k.map((prediction, index) => (
                     <div key={prediction.class_name} className="flex items-center justify-between">
                       <span className="text-sm text-slate-300">
-                        {index + 1}. {prediction.class_name.replace("___", " — ").replace(/_/g, " ")}
+                        {index + 1}. {prediction.class_name.replace(/___/g, " — ").replace(/_/g, " ")}
                       </span>
                       <span className={`text-sm font-medium ${
                         prediction.confidence > 0.75 ? 'text-emerald-400' : 

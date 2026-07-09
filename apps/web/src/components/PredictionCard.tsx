@@ -30,7 +30,7 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ prediction }) => {
               <p className="text-xs font-semibold text-amber-500/80 uppercase tracking-wider">Top Alternatives</p>
               {prediction.top_k.slice(1).map((alt, idx) => (
                 <div key={idx} className="flex justify-between items-center text-sm">
-                  <span className="text-amber-100/90">{alt.class_name.replace("___", " — ").replace("_", " ")}</span>
+                  <span className="text-amber-100/90">{alt.class_name.replace(/___/g, " — ").replace(/_/g, " ")}</span>
                   <span className="text-amber-500 font-medium">{Math.round(alt.confidence * 100)}%</span>
                 </div>
               ))}

@@ -1,31 +1,61 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface ConfidenceBarProps {
   confidence: number;
 }
 
 const ConfidenceBar: React.FC<ConfidenceBarProps> = ({ confidence }) => {
-  const percentage = Math.round(confidence * 100);
+  const targetPercentage = Math.round(confidence * 100);
+  const [displayPercentage, setDisplayPercentage] = useState(0);
+  
+  // Animated count-up effect
+  useEffect(() => {
+    let startTime: number | null = null;
+    const duration = 1200; // ms
+
+    const animate = (currentTime: number) => {
+      if (startTime === null) startTime = currentTime;
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Ease-out cubic for smooth deceleration
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayPercentage(Math.round(eased * targetPercentage));
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [targetPercentage]);
   
   let colorClass = "text-emerald-500";
+  let glowColor = "drop-shadow(0 0 8px rgba(16, 185, 129, 0.4))";
   let label = "High Confidence";
   
   if (confidence < 0.75) {
     colorClass = "text-rose-500";
+    glowColor = "drop-shadow(0 0 8px rgba(244, 63, 94, 0.4))";
     label = "Low Confidence";
   } else if (confidence < 0.90) {
     colorClass = "text-amber-500";
+    glowColor = "drop-shadow(0 0 8px rgba(245, 158, 11, 0.4))";
     label = "Moderate Confidence";
   }
 
   const radius = 36;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+  const strokeDashoffset = circumference - (displayPercentage / 100) * circumference;
 
   return (
     <div className="flex flex-col items-center justify-center py-2">
       <div className="relative w-28 h-28 flex items-center justify-center">
-        <svg className="w-full h-full transform -rotate-90 drop-shadow-md" viewBox="0 0 100 100">
+        <svg 
+          className="w-full h-full transform -rotate-90" 
+          viewBox="0 0 100 100"
+          style={{ filter: glowColor }}
+        >
           <circle
             className="text-white/10 stroke-current"
             strokeWidth="8"
@@ -35,7 +65,7 @@ const ConfidenceBar: React.FC<ConfidenceBarProps> = ({ confidence }) => {
             fill="transparent"
           />
           <circle
-            className={`${colorClass} stroke-current transition-all duration-1500 ease-out`}
+            className={`${colorClass} stroke-current`}
             strokeWidth="8"
             strokeLinecap="round"
             cx="50"
@@ -44,11 +74,12 @@ const ConfidenceBar: React.FC<ConfidenceBarProps> = ({ confidence }) => {
             fill="transparent"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
+            style={{ transition: 'stroke-dashoffset 0.05s linear' }}
           />
         </svg>
         <div className="absolute flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
-            {percentage}%
+          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300 tabular-nums">
+            {displayPercentage}%
           </span>
         </div>
       </div>

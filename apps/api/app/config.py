@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 from pathlib import Path
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "PlantPlus"
+    PROJECT_NAME: str = "PlantPulse"
     API_V1_STR: str = "/api/v1"
     
     # Paths
