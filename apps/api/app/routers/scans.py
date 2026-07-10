@@ -82,63 +82,6 @@ async def get_scan_history(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{scan_id}")
-async def get_scan_by_id(
-    scan_id: str,
-    token_data: dict = Depends(verify_firebase_token)
-):
-    """Get a single scan by its ID."""
-    uid = token_data.get("uid")
-    if not uid:
-        raise HTTPException(status_code=401, detail="User ID not found in token")
-
-    table = get_dynamodb_table()
-    if not table:
-        raise HTTPException(status_code=503, detail="DynamoDB not initialized")
-
-    try:
-        response = table.get_item(
-            Key={"userId": uid, "scanId": scan_id}
-        )
-        item = response.get("Item")
-        if not item:
-            raise HTTPException(status_code=404, detail="Scan not found")
-        return decimal_to_float(item)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.delete("/{scan_id}")
-async def delete_scan(
-    scan_id: str,
-    token_data: dict = Depends(verify_firebase_token)
-):
-    uid = token_data.get("uid")
-    if not uid:
-        raise HTTPException(status_code=401, detail="User ID not found in token")
-
-    table = get_dynamodb_table()
-    if not table:
-        raise HTTPException(status_code=503, detail="DynamoDB not initialized")
-
-    try:
-        table.delete_item(
-            Key={
-                "userId": uid,
-                "scanId": scan_id
-            },
-            ConditionExpression="attribute_exists(userId)" # Ensure it exists before deleting, or just delete blindly
-        )
-        return {"detail": "Scan deleted successfully"}
-    except Exception as e:
-        # If ConditionExpression fails, it means item doesn't exist
-        if e.__class__.__name__ == 'ConditionalCheckFailedException':
-            raise HTTPException(status_code=404, detail="Scan not found")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @router.get("/stats")
 async def get_scan_stats(
     token_data: dict = Depends(verify_firebase_token)
@@ -196,4 +139,62 @@ async def get_scan_stats(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{scan_id}")
+async def get_scan_by_id(
+    scan_id: str,
+    token_data: dict = Depends(verify_firebase_token)
+):
+    """Get a single scan by its ID."""
+    uid = token_data.get("uid")
+    if not uid:
+        raise HTTPException(status_code=401, detail="User ID not found in token")
+
+    table = get_dynamodb_table()
+    if not table:
+        raise HTTPException(status_code=503, detail="DynamoDB not initialized")
+
+    try:
+        response = table.get_item(
+            Key={"userId": uid, "scanId": scan_id}
+        )
+        item = response.get("Item")
+        if not item:
+            raise HTTPException(status_code=404, detail="Scan not found")
+        return decimal_to_float(item)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/{scan_id}")
+async def delete_scan(
+    scan_id: str,
+    token_data: dict = Depends(verify_firebase_token)
+):
+    uid = token_data.get("uid")
+    if not uid:
+        raise HTTPException(status_code=401, detail="User ID not found in token")
+
+    table = get_dynamodb_table()
+    if not table:
+        raise HTTPException(status_code=503, detail="DynamoDB not initialized")
+
+    try:
+        table.delete_item(
+            Key={
+                "userId": uid,
+                "scanId": scan_id
+            },
+            ConditionExpression="attribute_exists(userId)" # Ensure it exists before deleting, or just delete blindly
+        )
+        return {"detail": "Scan deleted successfully"}
+    except Exception as e:
+        # If ConditionExpression fails, it means item doesn't exist
+        if e.__class__.__name__ == 'ConditionalCheckFailedException':
+            raise HTTPException(status_code=404, detail="Scan not found")
+        raise HTTPException(status_code=500, detail=str(e))
+
 

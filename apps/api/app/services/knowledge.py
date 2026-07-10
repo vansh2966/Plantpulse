@@ -7,7 +7,7 @@ from app.schemas.predict import Advice
 
 class KnowledgeService:
     def __init__(self):
-        self.knowledge_path = settings.BASE_DIR.parent.parent.parent / "CROP" / "knowledge" / "knowledge_base.json"
+        self.knowledge_path = settings.KNOWLEDGE_BASE_PATH
         self._data = self._load_data()
         # Build a normalized lookup index for fuzzy matching
         self._index = self._build_index()

@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str = os.getenv("AWS_SECRET_ACCESS_KEY", "")
     
     # Knowledge Base
-    KNOWLEDGE_BASE_PATH: Path = Path(os.getenv("KNOWLEDGE_BASE_PATH", str(BASE_DIR.parent.parent.parent / "CROP" / "knowledge" / "knowledge_base.json")))
+    KNOWLEDGE_BASE_PATH: Path = Path(os.getenv("KNOWLEDGE_BASE_PATH", str(BASE_DIR.parent.parent.parent.parent / "CROP" / "knowledge" / "knowledge_base.json")))
 
     # ML Logging
     WANDB_PROJECT: str = "cropai-v2"

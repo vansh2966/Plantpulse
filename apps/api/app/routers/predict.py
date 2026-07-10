@@ -1,5 +1,6 @@
 import io
-from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
+from fastapi import APIRouter, File, UploadFile, HTTPException, Depends, Form
+from typing import Optional
 from datetime import datetime, timezone
 from PIL import Image, UnidentifiedImageError
 from app.schemas.predict import PredictResponse, PredictionResult, PredictionClass, ScanResult
@@ -12,15 +13,16 @@ from app.middleware.auth import verify_firebase_token
 router = APIRouter()
 
 @router.post("/predict", response_model=PredictResponse)
-async def predict_image(
+def predict_image(
     image: UploadFile = File(...),
+    crop_filter: Optional[str] = Form(None),
     token_data: dict = Depends(verify_firebase_token)
 ):
     if not image.content_type or not image.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File provided is not an image.")
     
     try:
-        contents = await image.read()
+        contents = image.file.read()
         
         # Validate dimensions
         try:
@@ -34,7 +36,7 @@ async def predict_image(
             raise HTTPException(status_code=400, detail="Invalid image file format.")
             
         # Run inference
-        prediction = inference_service.predict(contents)
+        prediction = inference_service.predict(contents, crop_filter=crop_filter)
         
         # Fetch knowledge advice
         advice = knowledge_service.get_advice(prediction.class_name)
@@ -57,7 +59,8 @@ async def predict_image(
         prediction_data = {
             "class_name": prediction.class_name,
             "confidence": prediction.confidence,
-            "top_k": [{"class_name": c, "confidence": p} for c, p in prediction.top_k]
+            "top_k": [{"class_name": c, "confidence": p} for c, p in prediction.top_k],
+            "crop_filter": crop_filter
         }
         scan_id = scan_logger_service.log_scan(uid, prediction_data, image_url)
         

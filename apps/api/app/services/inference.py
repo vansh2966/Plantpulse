@@ -67,7 +67,15 @@ class InferenceService:
                 weights_only=False,
             )
 
-            class_names = checkpoint["class_names"]
+            class_names = checkpoint.get("class_names", [])
+            
+            # If checkpoint has missing or numeric class names, load from JSON mapping file
+            if not class_names or all(str(c).isdigit() for c in class_names):
+                if self.json_path.exists():
+                    print(f"Loading class names from {self.json_path}")
+                    with open(self.json_path, "r") as f:
+                        class_names = json.load(f)
+            
             num_classes = len(class_names)
 
             model = build_model(num_classes=num_classes, pretrained=False)
@@ -119,7 +127,7 @@ class InferenceService:
             is_confident=best_confidence >= settings.CONFIDENCE_THRESHOLD,
         )
 
-    def predict(self, image_bytes: bytes) -> InferencePrediction:
+    def predict(self, image_bytes: bytes, crop_filter: str = None) -> InferencePrediction:
         if not self.is_ready:
             self.load_model()
             
@@ -138,13 +146,17 @@ class InferenceService:
             ort_inputs = {input_name: tensor.numpy()}
             ort_outs = self.ort_session.run(None, ort_inputs)
             logits = torch.tensor(ort_outs[0])
+            if crop_filter:
+                mask = torch.tensor([not c.startswith(crop_filter) for c in self.class_names])
+                logits[0, mask] = float('-inf')
+                
             probabilities = F.softmax(logits, dim=1).squeeze()
             return self._build_prediction(probabilities)
         else:
             # PyTorch Inference — use TTA for higher confidence
-            return self._predict_with_tta(image)
+            return self._predict_with_tta(image, crop_filter)
 
-    def _predict_with_tta(self, image: Image.Image) -> InferencePrediction:
+    def _predict_with_tta(self, image: Image.Image, crop_filter: str = None) -> InferencePrediction:
         """
         Predict with Test-Time Augmentation (TTA) for higher confidence.
         Averages predictions over the original image + augmented versions.
@@ -163,6 +175,11 @@ class InferenceService:
             tensor = self.transforms(aug_image).unsqueeze(0).to(self.device)
             with torch.no_grad():
                 logits = self.model(tensor)
+                
+            if crop_filter:
+                mask = torch.tensor([not c.startswith(crop_filter) for c in self.class_names])
+                logits[0, mask] = float('-inf')
+                
             probs = F.softmax(logits, dim=1).squeeze()
             all_probs.append(probs)
 

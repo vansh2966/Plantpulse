@@ -20,6 +20,8 @@ PlantPulse helps identify plant diseases from photos of crop leaves.
 
 It uses a custom-trained ConvNeXt-Tiny architecture with a CBAM (Convolutional Block Attention Module) to detect 94 different crop conditions across several plant species, including tomato, apple, potato, sugarcane, tea, rice, jute, guava, cotton, corn, cauliflower, banana, and papaya.
 
+**Crop Selection Filter:** To maximize diagnostic accuracy, users can optionally select their target crop before scanning. Our custom PyTorch backend intercepts the AI's internal scores (logits) and mathematically masks out irrelevant diseases before making a final prediction, effectively eliminating cross-crop false positives.
+
 Once a diagnosis is made, PlantPulse provides a treatment plan that includes chemical and organic treatment options, nutrient recommendations, and pruning advice tailored to the specific condition.
 
 ---

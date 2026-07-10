@@ -5,9 +5,10 @@ import { useToast } from './Toast';
 interface ImageUploadProps {
   onImageSelected: (file: File) => void;
   isLoading: boolean;
+  onClear?: () => void;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected, isLoading }) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected, isLoading, onClear }) => {
   const [dragActive, setDragActive] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { showToast } = useToast();
@@ -102,6 +103,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected, isLoading })
 
   const clearImage = () => {
     setPreviewUrl(null);
+    if (onClear) {
+      onClear();
+    }
   };
 
   if (previewUrl) {

@@ -22,6 +22,11 @@ def verify_firebase_token(credentials: HTTPAuthorizationCredentials = Depends(se
     """
     token = credentials.credentials
     try:
+        # Development fallback if Firebase is not initialized
+        if not firebase_admin._apps:
+            print("WARNING: Firebase not initialized. Using mock token for development.")
+            return {"uid": "dev_test_user_123", "email": "test@example.com"}
+            
         decoded_token = auth.verify_id_token(token)
         return decoded_token
     except Exception as e:

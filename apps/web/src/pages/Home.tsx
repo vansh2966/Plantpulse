@@ -4,6 +4,7 @@ import PredictionCard from '../components/PredictionCard';
 import AdvicePanel from '../components/AdvicePanel';
 import { useToast } from '../components/Toast';
 import { SkeletonLoader } from '../components/SkeletonLoader';
+import CropSelector from '../components/CropSelector';
 import api from '../services/api';
 import type { PredictResponse } from '@plantpulse/shared/types/prediction';
 import { Zap, Shield, Eye, Leaf } from 'lucide-react';
@@ -31,9 +32,12 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, del
 const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<PredictResponse | null>(null);
+  const [selectedCrop, setSelectedCrop] = useState('');
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
   const { showToast } = useToast();
 
-  const handleImageUpload = async (file: File) => {
+  const handleImageUpload = async (file: File, cropOverride?: string) => {
+    setCurrentFile(file);
     setIsLoading(true);
     setResult(null);
     
@@ -41,11 +45,12 @@ const Home: React.FC = () => {
       const formData = new FormData();
       formData.append('image', file);
       
-      const response = await api.post<PredictResponse>('/predict', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const cropToUse = cropOverride !== undefined ? cropOverride : selectedCrop;
+      if (cropToUse) {
+        formData.append('crop_filter', cropToUse);
+      }
+      
+      const response = await api.post<PredictResponse>('/predict', formData);
       
       setResult(response.data);
     } catch (error) {
@@ -54,6 +59,18 @@ const Home: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCropChange = (crop: string) => {
+    setSelectedCrop(crop);
+    if (currentFile) {
+      handleImageUpload(currentFile, crop);
+    }
+  };
+
+  const handleClear = () => {
+    setResult(null);
+    setCurrentFile(null);
   };
 
   return (
@@ -81,27 +98,42 @@ const Home: React.FC = () => {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Upload Section */}
-          <div className={`${result ? 'lg:col-span-4' : 'lg:col-span-12'} transition-all duration-500 flex justify-center w-full`}>
-            <ImageUpload onImageSelected={handleImageUpload} isLoading={isLoading} />
-          </div>
-
-          {/* Results Section */}
-          {isLoading ? (
-            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6 w-full animate-fade-in">
-              <SkeletonLoader type="card" className="h-[500px]" />
-              <SkeletonLoader type="card" className="h-[500px]" />
-            </div>
-          ) : result && (
-            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-up">
-              <div className="h-full">
+          {/* Left Column: Upload & Quick Result */}
+          <div className="lg:col-span-4 flex flex-col gap-6 w-full">
+            <CropSelector 
+              selectedCrop={selectedCrop} 
+              onCropChange={handleCropChange}
+              disabled={isLoading}
+            />
+            <ImageUpload 
+              onImageSelected={handleImageUpload} 
+              isLoading={isLoading} 
+              onClear={handleClear}
+            />
+            
+            {isLoading && (
+              <div className="animate-fade-in">
+                <SkeletonLoader type="card" className="h-[300px]" />
+              </div>
+            )}
+            
+            {!isLoading && result && (
+              <div className="animate-fade-in">
                 <PredictionCard prediction={result.prediction} />
               </div>
-              <div className="h-full">
-                {result.advice && <AdvicePanel advice={result.advice} />}
+            )}
+          </div>
+
+          {/* Right Column: Detailed Advice */}
+          <div className="lg:col-span-8 w-full">
+            {isLoading ? (
+              <SkeletonLoader type="card" className="h-[600px]" />
+            ) : result && result.advice ? (
+              <div className="animate-slide-up h-full">
+                <AdvicePanel advice={result.advice} />
               </div>
-            </div>
-          )}
+            ) : null}
+          </div>
         </div>
 
         {/* Feature Cards — shown when no result */}
