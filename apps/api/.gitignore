@@ -2,6 +2,5 @@
 firebase-credentials*.json
 venv/
 __pycache__/
-*.pt
 *.onnx
 .env
