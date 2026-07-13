@@ -22,8 +22,12 @@ class Settings(BaseSettings):
     # Security
     ALLOWED_ORIGINS: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
-    # Firebase Auth
-    FIREBASE_CREDENTIALS: str = os.getenv("FIREBASE_CREDENTIALS", "")
+    # Supabase Auth & DB
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+    SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
+    SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET", "")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
     
     # AWS (DynamoDB & S3)
     AWS_REGION: str = os.getenv("AWS_REGION", "ap-south-1")

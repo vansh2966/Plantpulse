@@ -4,7 +4,7 @@ from io import BytesIO
 from urllib.parse import urlparse
 
 from app.services.inference import inference_service
-from app.middleware.auth import verify_firebase_token
+from app.middleware.auth import verify_supabase_token
 from app.config import settings
 
 router = APIRouter()
@@ -14,8 +14,7 @@ ALLOWED_URL_DOMAINS = [
     "s3.amazonaws.com",
     f"s3.{settings.AWS_REGION}.amazonaws.com",
     f"{settings.S3_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com",
-    "firebasestorage.googleapis.com",
-    "storage.googleapis.com",
+    "supabase.co",
 ]
 
 def _validate_image_url(url: str) -> None:
@@ -26,14 +25,14 @@ def _validate_image_url(url: str) -> None:
     if not any(parsed.hostname.endswith(domain) for domain in ALLOWED_URL_DOMAINS):
         raise HTTPException(
             status_code=400,
-            detail="Image URL domain not allowed. Only S3 and Firebase Storage URLs are accepted."
+            detail="Image URL domain not allowed. Only S3 and Supabase Storage URLs are accepted."
         )
 
 @router.post("/gradcam")
 async def generate_gradcam(
     image: UploadFile = File(None),
     image_url: str = Form(None),
-    token_data: dict = Depends(verify_firebase_token)
+    token_data: dict = Depends(verify_supabase_token)
 ):
     """
     Generate a Grad-CAM heatmap overlay for the uploaded plant leaf image.

@@ -1,10 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Camera, Shield, Zap, Leaf } from 'lucide-react';
-import { auth } from '../config/firebase';
+import { auth } from '../config/supabase';
 
 const Onboarding: React.FC = () => {
-  if (auth.currentUser) {
+  const [loading, setLoading] = useState(true);
+  const [hasUser, setHasUser] = useState(false);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await auth.getSession();
+      setHasUser(!!session);
+      setLoading(false);
+    };
+    checkUser();
+  }, []);
+
+  if (loading) return null;
+  if (hasUser) {
     return <Navigate to="/" replace />;
   }
 

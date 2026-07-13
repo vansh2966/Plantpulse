@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './src/config/firebase';
+import { auth } from './src/config/supabase';
 import { View, ActivityIndicator } from 'react-native';
 
 import LoginScreen from './src/screens/LoginScreen';
@@ -12,15 +11,15 @@ import ScanDetailScreen from './src/screens/ScanDetailScreen';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [user, setUser] = useState(auth.currentUser);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const { data: { subscription } } = auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
       setLoading(false);
     });
-    return unsubscribe;
+    return () => subscription.unsubscribe();
   }, []);
 
   if (loading) {

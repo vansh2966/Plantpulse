@@ -1,5 +1,5 @@
 import axios from "axios";
-import { auth } from "../config/firebase";
+import { auth } from "../config/supabase";
 
 // In React Native (Android Emulator), localhost refers to the emulator itself.
 // To reach the development machine's localhost, use 10.0.2.2.
@@ -11,11 +11,10 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  const user = auth.currentUser;
-  if (user) {
-    const token = await user.getIdToken();
+  const { data: { session } } = await auth.getSession();
+  if (session) {
     if (config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${session.access_token}`;
     }
   }
   return config;

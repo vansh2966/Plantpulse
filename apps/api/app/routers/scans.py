@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
-from app.middleware.auth import verify_firebase_token
+from app.middleware.auth import verify_supabase_token
 from app.schemas.scan import ScanHistoryResponse, ScanHistoryItem
 from app.config import settings
 
@@ -33,9 +33,9 @@ async def get_scan_history(
     limit: int = Query(20, ge=1, le=100, description="Number of scans to return"),
     offset: int = Query(0, ge=0, description="Number of scans to skip"),
     class_name: Optional[str] = Query(None, description="Filter by disease class name"),
-    token_data: dict = Depends(verify_firebase_token)
+    token_data: dict = Depends(verify_supabase_token)
 ):
-    uid = token_data.get("uid")
+    uid = token_data.get("sub")
     if not uid:
         raise HTTPException(status_code=401, detail="User ID not found in token")
 
@@ -84,10 +84,10 @@ async def get_scan_history(
 
 @router.get("/stats")
 async def get_scan_stats(
-    token_data: dict = Depends(verify_firebase_token)
+    token_data: dict = Depends(verify_supabase_token)
 ):
     """Get aggregate statistics for the user's scans."""
-    uid = token_data.get("uid")
+    uid = token_data.get("sub")
     if not uid:
         raise HTTPException(status_code=401, detail="User ID not found in token")
 
@@ -144,10 +144,10 @@ async def get_scan_stats(
 @router.get("/{scan_id}")
 async def get_scan_by_id(
     scan_id: str,
-    token_data: dict = Depends(verify_firebase_token)
+    token_data: dict = Depends(verify_supabase_token)
 ):
     """Get a single scan by its ID."""
-    uid = token_data.get("uid")
+    uid = token_data.get("sub")
     if not uid:
         raise HTTPException(status_code=401, detail="User ID not found in token")
 
@@ -172,9 +172,9 @@ async def get_scan_by_id(
 @router.delete("/{scan_id}")
 async def delete_scan(
     scan_id: str,
-    token_data: dict = Depends(verify_firebase_token)
+    token_data: dict = Depends(verify_supabase_token)
 ):
-    uid = token_data.get("uid")
+    uid = token_data.get("sub")
     if not uid:
         raise HTTPException(status_code=401, detail="User ID not found in token")
 

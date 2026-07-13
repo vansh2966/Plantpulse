@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { auth } from '../config/firebase';
-import { signOut } from 'firebase/auth';
+import { auth } from '../config/supabase';
 
 const ProfileScreen = () => {
-  const user = auth.currentUser;
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      await auth.signOut();
     } catch (error) {
       console.error('Sign out error:', error);
     }
@@ -26,7 +33,7 @@ const ProfileScreen = () => {
         </View>
         
         <Text style={styles.emailText}>{user?.email}</Text>
-        <Text style={styles.uidText}>ID: {user?.uid}</Text>
+        <Text style={styles.uidText}>ID: {user?.id}</Text>
         
         <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
           <Text style={styles.signOutText}>Sign Out</Text>

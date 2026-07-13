@@ -1,15 +1,29 @@
-import React from 'react';
-import { auth } from '../config/firebase';
-import { signOut } from 'firebase/auth';
+import React, { useEffect, useState } from 'react';
+import { auth } from '../config/supabase';
 import { useNavigate } from 'react-router-dom';
+
+interface SupabaseUser {
+  id: string;
+  email: string | null;
+  user_metadata: any;
+  created_at: string;
+}
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const user = auth.currentUser;
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      await auth.signOut();
       navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
@@ -27,7 +41,7 @@ const Profile: React.FC = () => {
               {user?.email?.[0].toUpperCase() || 'U'}
             </div>
             <div>
-              <h2 className="text-2xl font-semibold text-white">{user?.displayName || 'Farmer'}</h2>
+              <h2 className="text-2xl font-semibold text-white">{user?.user_metadata?.full_name || 'Farmer'}</h2>
               <p className="text-gray-400">{user?.email}</p>
             </div>
           </div>
@@ -38,12 +52,12 @@ const Profile: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-surface-raised p-4 rounded-lg border border-white/5">
                   <p className="text-sm text-gray-400 mb-1">User ID</p>
-                  <p className="text-white font-mono text-sm break-all">{user?.uid}</p>
+                  <p className="text-white font-mono text-sm break-all">{user?.id}</p>
                 </div>
                 <div className="bg-surface-raised p-4 rounded-lg border border-white/5">
                   <p className="text-sm text-gray-400 mb-1">Account Created</p>
                   <p className="text-white">
-                    {user?.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown'}
+                    {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
                   </p>
                 </div>
               </div>

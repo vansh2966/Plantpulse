@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './config/firebase';
+import { auth } from './config/supabase';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import History from './pages/History';
@@ -17,11 +16,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const { data: { subscription } } = auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
       setLoading(false);
     });
-    return unsubscribe;
+    return () => subscription.unsubscribe();
   }, []);
 
   if (loading) {

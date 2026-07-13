@@ -1,17 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { auth } from '../config/firebase';
-import { signOut } from 'firebase/auth';
+import { auth } from '../config/supabase';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      await auth.signOut();
       navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
@@ -64,7 +72,7 @@ const Navbar: React.FC = () => {
               className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
             >
               <span className="font-medium text-sm">
-                {auth.currentUser?.email?.[0].toUpperCase() || 'U'}
+                {user?.email?.[0].toUpperCase() || 'U'}
               </span>
             </button>
 
@@ -76,7 +84,7 @@ const Navbar: React.FC = () => {
                 ></div>
                 <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 glass-card z-50 animate-fade-in-up">
                   <div className="px-4 py-2 text-xs text-gray-400 truncate border-b border-white/10">
-                    {auth.currentUser?.email}
+                    {user?.email}
                   </div>
                   <Link
                     to="/profile"

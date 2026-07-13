@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from 'react-native';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { auth } from '../config/supabase';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 
@@ -23,10 +22,14 @@ const LoginScreen = () => {
   useEffect(() => {
     if (response?.type === 'success') {
       const { id_token } = response.params;
-      const credential = GoogleAuthProvider.credential(id_token);
       setIsLoading(true);
-      signInWithCredential(auth, credential)
-        .catch((e: any) => setError(e.message))
+      auth.signInWithIdToken({
+        provider: 'google',
+        token: id_token,
+      })
+        .then(({ error }) => {
+          if (error) setError(error.message);
+        })
         .finally(() => setIsLoading(false));
     } else if (response?.type === 'error') {
       setError('Google Sign-In failed or was cancelled');
@@ -38,9 +41,11 @@ const LoginScreen = () => {
     setIsLoading(true);
     try {
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const { error } = await auth.signUp({ email, password });
+        if (error) throw error;
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        const { error } = await auth.signInWithPassword({ email, password });
+        if (error) throw error;
       }
     } catch (e: any) {
       setError(e.message);

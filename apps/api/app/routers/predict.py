@@ -8,7 +8,7 @@ from app.services.inference import inference_service
 from app.services.knowledge import knowledge_service
 from app.services.storage import storage_service
 from app.services.scan_logger import scan_logger_service
-from app.middleware.auth import verify_firebase_token
+from app.middleware.auth import verify_supabase_token
 
 router = APIRouter()
 
@@ -16,7 +16,7 @@ router = APIRouter()
 def predict_image(
     image: UploadFile = File(...),
     crop_filter: Optional[str] = Form(None),
-    token_data: dict = Depends(verify_firebase_token)
+    token_data: dict = Depends(verify_supabase_token)
 ):
     if not image.content_type or not image.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File provided is not an image.")
@@ -51,8 +51,8 @@ def predict_image(
             top_k=[PredictionClass(class_name=c, confidence=p) for c, p in prediction.top_k]
         )
         
-        # Upload image to Firebase Storage
-        uid = token_data.get("uid")
+        # Upload image to Supabase Storage
+        uid = token_data.get("sub")
         image_url = storage_service.upload_scan_image(uid, contents, image.content_type)
         
         # Log scan to DynamoDB

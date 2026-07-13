@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { auth } from '../config/firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../config/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/Toast';
 
@@ -15,8 +14,13 @@ const Login: React.FC = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const { error } = await auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      if (error) throw error;
       navigate('/');
     } catch (err: any) {
       showToast(err.message || 'Google Sign-In failed', 'error');
@@ -29,7 +33,8 @@ const Login: React.FC = () => {
       return;
     }
     try {
-      await sendPasswordResetEmail(auth, email);
+      const { error } = await auth.resetPasswordForEmail(email);
+      if (error) throw error;
       showToast('Password reset email sent! Check your inbox.', 'success');
     } catch (err: any) {
       showToast(err.message || 'Failed to send reset email', 'error');
@@ -43,9 +48,11 @@ const Login: React.FC = () => {
 
     try {
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const { error } = await auth.signUp({ email, password });
+        if (error) throw error;
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        const { error } = await auth.signInWithPassword({ email, password });
+        if (error) throw error;
       }
       navigate('/');
     } catch (err: any) {

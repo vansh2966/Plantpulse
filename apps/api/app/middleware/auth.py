@@ -1,35 +1,29 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-import firebase_admin
-from firebase_admin import auth
+from jose import jwt, JWTError
 import os
 from app.config import settings
 
-# Initialize Firebase App globally if credentials exist
-cred_path = os.getenv("FIREBASE_CREDENTIALS", settings.FIREBASE_CREDENTIALS)
-if cred_path and os.path.exists(cred_path):
-    from firebase_admin import credentials
-    if not firebase_admin._apps:
-        cred = credentials.Certificate(cred_path)
-        firebase_admin.initialize_app(cred)
-
 security = HTTPBearer()
 
-def verify_firebase_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+def verify_supabase_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """
-    Verify the Firebase ID token in the Authorization header.
-    Returns the decoded token (which contains uid, email, etc.)
+    Verify the Supabase JWT in the Authorization header.
+    Returns the decoded token (which contains sub, email, etc.)
     """
     token = credentials.credentials
+    jwt_secret = os.getenv("SUPABASE_JWT_SECRET", settings.SUPABASE_JWT_SECRET)
+
+    if not jwt_secret:
+        # Development fallback if secret is missing
+        print("WARNING: SUPABASE_JWT_SECRET not set. Using mock token for development.")
+        return {"sub": "dev_test_user_123", "email": "test@example.com"}
+
     try:
-        # Development fallback if Firebase is not initialized
-        if not firebase_admin._apps:
-            print("WARNING: Firebase not initialized. Using mock token for development.")
-            return {"uid": "dev_test_user_123", "email": "test@example.com"}
-            
-        decoded_token = auth.verify_id_token(token)
+        # Supabase uses HS256 by default for JWTs
+        decoded_token = jwt.decode(token, jwt_secret, algorithms=["HS256"])
         return decoded_token
-    except Exception as e:
+    except JWTError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid authentication credentials: {str(e)}",
