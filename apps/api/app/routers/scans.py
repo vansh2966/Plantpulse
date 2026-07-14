@@ -5,6 +5,7 @@ from boto3.dynamodb.conditions import Key, Attr
 from app.middleware.auth import verify_supabase_token
 from app.schemas.scan import ScanHistoryResponse, ScanHistoryItem
 from app.config import settings
+from app.services.knowledge import knowledge_service
 
 router = APIRouter()
 
@@ -162,7 +163,15 @@ async def get_scan_by_id(
         item = response.get("Item")
         if not item:
             raise HTTPException(status_code=404, detail="Scan not found")
-        return decimal_to_float(item)
+        
+        float_item = decimal_to_float(item)
+        advice = knowledge_service.get_advice(float_item.get("class_name", ""))
+        if advice:
+            float_item["advice"] = advice.model_dump() if hasattr(advice, "model_dump") else advice.dict()
+        else:
+            float_item["advice"] = None
+            
+        return float_item
     except HTTPException:
         raise
     except Exception as e:

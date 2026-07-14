@@ -4,6 +4,8 @@ import { ChevronLeft, Trash2, Eye, SlidersHorizontal } from 'lucide-react';
 import { SkeletonLoader } from '../components/SkeletonLoader';
 import { useToast } from '../components/Toast';
 import ConfidenceBar from '../components/ConfidenceBar';
+import AdvicePanel from '../components/AdvicePanel';
+import type { Advice } from '@plantpulse/shared/types/prediction';
 import api from '../services/api';
 
 interface ScanData {
@@ -13,6 +15,7 @@ interface ScanData {
   image_url: string;
   timestamp: string;
   top_k: { class_name: string; confidence: number }[];
+  advice?: Advice | null;
 }
 
 const ScanDetail: React.FC = () => {
@@ -234,6 +237,13 @@ const ScanDetail: React.FC = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Advice Panel */}
+            {scan.advice && (
+              <div className="h-[600px] mb-8">
+                <AdvicePanel advice={scan.advice} />
               </div>
             )}
           </div>
