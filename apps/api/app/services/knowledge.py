@@ -26,8 +26,8 @@ class KnowledgeService:
         name = name.replace("___", " ").replace("_", " ")
         name = re.sub(r'[(),]', ' ', name)
         name = re.sub(r'\s+', ' ', name).strip().lower()
-        # Sort words for order-independent matching
-        return " ".join(sorted(name.split()))
+        # Sort words for order-independent matching (use set to remove duplicates)
+        return " ".join(sorted(set(name.split())))
 
     def _build_index(self) -> dict:
         """Build an index mapping normalized keys to original keys."""
