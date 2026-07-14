@@ -38,7 +38,7 @@ graph TD
     end
 
     subgraph Authentication
-        FA[Firebase Authentication]
+        FA[Supabase Authentication]
     end
 
     subgraph Backend Core
@@ -83,13 +83,13 @@ graph TD
 The backend API server handles the core logic.
 - ML Inference: Runs the model to generate predictions.
 - Grad-CAM Visualization: Uses PyTorch to generate visual gradient class activation maps (Grad-CAM), highlighting where the model focused on the leaf.
-- Authentication: Validates JWT tokens using the Firebase Admin SDK.
+- Authentication: Validates JWT tokens using Supabase.
 - Cloud Storage and Logging: Uses AWS S3 to store uploaded leaf images and DynamoDB to log scan history.
 - Knowledge Base: Serves automated agricultural advice retrieved from a structured JSON file.
 
 ### 2. apps/web/ (React + Vite + TailwindCSS)
 The responsive web dashboard for desktop and mobile browsers.
-- Integrates Firebase JS SDK for Google Sign-in.
+- Integrates Supabase JS SDK for Google Sign-in.
 - Built with Tailwind CSS for styling.
 
 ### 3. apps/mobile/ (React Native + Expo)
@@ -194,8 +194,8 @@ npx expo start
 
 ## Configuration
 To run this project locally, you need to provide your own `.env` files.
-* Backend: Requires AWS Keys (AWS_ACCESS_KEY_ID), Firebase Admin SDK JSON credentials, and S3/DynamoDB configuration.
-* Frontend/Mobile: Requires Firebase Web Client configuration keys.
+* Backend: Requires AWS Keys (AWS_ACCESS_KEY_ID), Supabase Service Role configuration, and S3/DynamoDB configuration.
+* Frontend/Mobile: Requires Supabase Anon Key and URL.
 
 ---
 *Built for modern agriculture.*
