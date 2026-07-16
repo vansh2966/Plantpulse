@@ -7,27 +7,9 @@ import { SkeletonLoader } from '../components/SkeletonLoader';
 import CropSelector from '../components/CropSelector';
 import api from '../services/api';
 import type { PredictResponse } from '@plantpulse/shared/types/prediction';
-import { Zap, Shield, Eye, Leaf } from 'lucide-react';
+import { Leaf } from 'lucide-react';
 
-interface FeatureCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  delay: number;
-}
 
-const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, delay }) => (
-  <div 
-    className="glass-card p-6 text-center group hover:border-emerald-500/30 transition-all duration-300 animate-slide-up"
-    style={{ animationDelay: `${delay}ms` }}
-  >
-    <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all duration-300">
-      {icon}
-    </div>
-    <h3 className="text-white font-semibold mb-2">{title}</h3>
-    <p className="text-sm text-slate-400 leading-relaxed">{description}</p>
-  </div>
-);
 
 const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -74,46 +56,62 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen animate-fade-in bg-slate-950 text-slate-100 selection:bg-emerald-500/30 overflow-hidden relative">
-      {/* Background Ornaments */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-600/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-teal-600/20 rounded-full blur-[120px]" />
+    <div className="h-[calc(100vh-4rem)] w-full animate-fade-in text-stone-900 dark:text-slate-100 selection:bg-emerald-500/30 overflow-hidden relative font-sans transition-colors duration-300 flex flex-col">
+      {/* Background Image - Made prominent! */}
+      <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+        <img 
+          src="/home-bg.png" 
+          alt="Agriculture Field Background" 
+          className="absolute inset-0 w-full h-full object-cover opacity-100 dark:opacity-70"
+        />
+        {/* Lighter overlay to let the image shine but keep text readable */}
+        <div className="absolute inset-0 bg-stone-100/30 dark:bg-slate-950/60 transition-colors duration-300" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full text-sm font-medium ring-1 ring-emerald-500/20 mb-6 animate-fade-in">
-            <Leaf size={14} />
-            AI-Powered Plant Diagnosis
-          </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10 flex flex-col h-full flex-1 overflow-hidden">
+        
+        {/* Header - Shrinks when result is shown to save space */}
+        <div className={`text-center transition-all duration-500 flex-shrink-0 ${result || isLoading ? 'mb-4' : 'mb-8 mt-4'}`}>
+          {!result && !isLoading && (
+            <div className="inline-flex items-center gap-2 px-5 py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md text-emerald-700 dark:text-emerald-400 rounded-full text-sm font-bold shadow-sm mb-6 animate-fade-in border border-white/40 dark:border-white/10">
+              <Leaf size={16} />
+              AI-Powered Plant Diagnosis
+            </div>
+          )}
+          <h1 className={`font-black tracking-tight text-stone-900 dark:text-white drop-shadow-md transition-all duration-500 ${result || isLoading ? 'text-3xl mb-0' : 'text-5xl md:text-6xl mb-6'}`}>
             PlantPulse Diagnosis
           </h1>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            Upload a photo of a diseased plant leaf and instantly receive an AI-powered diagnosis and treatment plan.
-          </p>
+          {!result && !isLoading && (
+            <p className="text-xl text-stone-800 dark:text-slate-200 font-bold max-w-2xl mx-auto leading-relaxed drop-shadow-sm bg-white/50 dark:bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/30 dark:border-white/10">
+              Upload a photo of a diseased plant leaf and instantly receive an AI-powered diagnosis and treatment plan.
+            </p>
+          )}
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Upload & Quick Result */}
-          <div className="lg:col-span-4 flex flex-col gap-6 w-full">
-            <CropSelector 
-              selectedCrop={selectedCrop} 
-              onCropChange={handleCropChange}
-              disabled={isLoading}
-            />
-            <ImageUpload 
-              onImageSelected={handleImageUpload} 
-              isLoading={isLoading} 
-              onClear={handleClear}
-            />
+        {/* Main Content Area - Scrollable internally if needed */}
+        <div className={`w-full flex-1 min-h-0 transition-all duration-500 ${result || isLoading ? 'grid grid-cols-1 lg:grid-cols-12 gap-6' : 'max-w-3xl mx-auto flex flex-col justify-center'}`}>
+          
+          {/* Left Column (or center if no result) */}
+          <div className={`${result || isLoading ? 'lg:col-span-4 h-full overflow-y-auto no-scrollbar pb-4 pr-1' : 'w-full'} flex flex-col gap-4`}>
+            
+            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 rounded-3xl shadow-lg border border-white/40 dark:border-white/10">
+              <CropSelector 
+                selectedCrop={selectedCrop} 
+                onCropChange={handleCropChange}
+                disabled={isLoading}
+              />
+              <div className="mt-4">
+                <ImageUpload 
+                  onImageSelected={handleImageUpload} 
+                  isLoading={isLoading} 
+                  onClear={handleClear}
+                />
+              </div>
+            </div>
             
             {isLoading && (
               <div className="animate-fade-in">
-                <SkeletonLoader type="card" className="h-[300px]" />
+                <SkeletonLoader type="card" className="h-[250px] shadow-lg border border-white/40 dark:border-white/10" />
               </div>
             )}
             
@@ -124,41 +122,20 @@ const Home: React.FC = () => {
             )}
           </div>
 
-          {/* Right Column: Detailed Advice */}
-          <div className="lg:col-span-8 w-full">
-            {isLoading ? (
-              <SkeletonLoader type="card" className="h-[600px]" />
-            ) : result && result.advice ? (
-              <div className="animate-slide-up h-full">
-                <AdvicePanel advice={result.advice} />
-              </div>
-            ) : null}
-          </div>
+          {/* Right Column: Detailed Advice - Appears only when loading or result */}
+          {(isLoading || result) && (
+            <div className="lg:col-span-8 w-full h-full overflow-y-auto no-scrollbar pb-4 pr-1">
+              {isLoading ? (
+                <SkeletonLoader type="card" className="h-full min-h-[500px] shadow-lg border border-white/40 dark:border-white/10" />
+              ) : result && result.advice ? (
+                <div className="animate-slide-up h-full">
+                  <AdvicePanel advice={result.advice} />
+                </div>
+              ) : null}
+            </div>
+          )}
+          
         </div>
-
-        {/* Feature Cards — shown when no result */}
-        {!result && !isLoading && (
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <FeatureCard
-              icon={<Zap size={24} />}
-              title="Instant Analysis"
-              description="Get accurate disease diagnosis in under 2 seconds using state-of-the-art deep learning."
-              delay={100}
-            />
-            <FeatureCard
-              icon={<Shield size={24} />}
-              title="94 Diseases Covered"
-              description="Trained on major crop diseases worldwide with treatment plans for each condition."
-              delay={200}
-            />
-            <FeatureCard
-              icon={<Eye size={24} />}
-              title="Visual Explainability"
-              description="See exactly where the AI detected disease with Grad-CAM heatmap visualization."
-              delay={300}
-            />
-          </div>
-        )}
       </div>
     </div>
   );

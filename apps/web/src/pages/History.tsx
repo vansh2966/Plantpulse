@@ -27,70 +27,89 @@ const History: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 relative overflow-hidden">
-      {/* Background Ornaments */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-10%] w-[30%] h-[30%] bg-emerald-600/10 rounded-full blur-[100px]" />
+    <div className="min-h-screen text-stone-900 dark:text-slate-100 font-sans pb-12 transition-colors duration-300 relative overflow-hidden flex flex-col">
+      {/* Background Image */}
+      <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+        <img 
+          src="/home-bg.png" 
+          alt="Agriculture Field Background" 
+          className="absolute inset-0 w-full h-full object-cover opacity-100 dark:opacity-70"
+        />
+        <div className="absolute inset-0 bg-stone-100/30 dark:bg-slate-950/60 transition-colors duration-300" />
       </div>
 
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex-1 flex flex-col">
         <div className="flex items-center gap-4 mb-8">
-          <Link to="/" className="p-2 bg-white/5 hover:bg-white/10 rounded-xl transition-colors ring-1 ring-white/10">
-            <ChevronLeft size={24} className="text-slate-300" />
+          <Link to="/" className="p-3 bg-white dark:bg-white/5 hover:bg-stone-100 dark:hover:bg-white/10 rounded-2xl transition-colors shadow-sm border border-stone-200 dark:border-white/10">
+            <ChevronLeft size={24} className="text-stone-600 dark:text-slate-400" />
           </Link>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">
+          <h1 className="text-4xl font-black text-stone-800 dark:text-white drop-shadow-sm">
             Scan History
           </h1>
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-            <SkeletonLoader type="card" count={6} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
+            <SkeletonLoader type="card" count={8} className="h-72" />
           </div>
         ) : scans.length === 0 ? (
-          <div className="text-center py-20 bg-white/5 backdrop-blur-md rounded-3xl ring-1 ring-white/10 animate-slide-up">
-            <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-              <Leaf size={32} />
+          <div className="text-center py-20 bg-white dark:bg-white/5 rounded-3xl shadow-sm border border-stone-200/50 dark:border-white/10 animate-slide-up relative overflow-hidden max-w-4xl mx-auto backdrop-blur-md">
+            <img 
+              src="/history-empty.png" 
+              alt="No scans yet" 
+              className="absolute inset-0 w-full h-full object-cover opacity-20 dark:opacity-10 pointer-events-none" 
+            />
+            <div className="relative z-10">
+              <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border-4 border-white dark:border-slate-800 transition-colors">
+                <Leaf size={36} />
+              </div>
+              <h2 className="text-3xl font-black text-stone-800 dark:text-white mb-2 drop-shadow-sm">No scans yet</h2>
+              <p className="text-stone-500 dark:text-slate-400 font-medium mb-8 text-lg">Upload a photo to get your first crop diagnosis.</p>
+              <Link to="/" className="inline-flex px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl transition-all shadow-lg hover:-translate-y-1">
+                Scan a Plant
+              </Link>
             </div>
-            <p className="text-xl font-medium text-white mb-2">No scans yet</p>
-            <p className="text-slate-400 mb-6">Upload a photo to get your first crop diagnosis.</p>
-            <Link to="/" className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white font-medium rounded-xl transition-colors">
-              Scan a Plant
-            </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {scans.map((scan) => (
-              <Link key={scan.id} to={`/history/${scan.id}`} className="bg-white/5 backdrop-blur-md rounded-2xl overflow-hidden ring-1 ring-white/10 hover:ring-emerald-500/50 transition-all group cursor-pointer">
-                <div className="h-48 w-full overflow-hidden bg-black/40">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {scans.map((scan, i) => (
+              <Link 
+                key={scan.id} 
+                to={`/history/${scan.id}`} 
+                className="bg-white dark:bg-white/5 backdrop-blur-md rounded-3xl overflow-hidden border border-stone-200/50 dark:border-white/10 hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:shadow-xl transition-all duration-300 group cursor-pointer animate-slide-up hover:-translate-y-1"
+                style={{ animationDelay: `${i * 50}ms` }}
+              >
+                <div className="h-48 w-full overflow-hidden bg-stone-100 dark:bg-black/20 relative">
                   {scan.image_url ? (
                     <img src={scan.image_url} alt="Crop Scan" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Leaf className="text-slate-700" size={48} />
+                      <Leaf className="text-stone-300 dark:text-slate-600" size={48} />
                     </div>
                   )}
+                  <div className="absolute top-3 right-3 px-3 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-full text-xs font-bold text-stone-700 dark:text-slate-300 shadow-sm border border-transparent dark:border-white/10">
+                    {Math.round(scan.confidence * 100)}% Match
+                  </div>
                 </div>
-                <div className="p-5">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-lg text-white line-clamp-1" title={scan.class_name.replace("___", " — ").replace(/_/g, " ")}>
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="font-bold text-lg text-stone-800 dark:text-white line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" title={scan.class_name.replace("___", " — ").replace(/_/g, " ")}>
                       {scan.class_name.replace("___", " — ").replace(/_/g, " ")}
                     </h3>
                   </div>
                   
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-stone-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
                       <div 
                         className={`h-full ${scan.confidence > 0.75 ? 'bg-emerald-500' : 'bg-amber-500'}`}
                         style={{ width: `${Math.round(scan.confidence * 100)}%` }}
                       />
                     </div>
-                    <span className="text-xs font-medium text-slate-300">{Math.round(scan.confidence * 100)}%</span>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-xs text-slate-400">
-                    <Calendar size={14} />
-                    <span>{new Date(scan.timestamp).toLocaleDateString()}</span>
+                  <div className="flex items-center gap-2 text-sm font-medium text-stone-500 dark:text-slate-400 bg-stone-50 dark:bg-black/20 px-3 py-2 rounded-xl ring-1 ring-transparent dark:ring-white/5">
+                    <Calendar size={16} className="text-emerald-500 dark:text-emerald-400" />
+                    <span>{new Date(scan.timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                   </div>
                 </div>
               </Link>

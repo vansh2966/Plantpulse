@@ -1,14 +1,15 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   
-  --color-primary: hsl(160, 84%, 50%);
+  --color-primary: hsl(152, 60%, 45%);
   --color-accent: hsl(174, 72%, 40%);
   --color-danger: hsl(0, 84%, 60%);
   --color-warning: hsl(38, 92%, 50%);
-  --color-surface: hsl(222, 47%, 6%);
-  --color-surface-raised: hsl(222, 47%, 11%);
+  --color-surface: hsl(40, 33%, 98%);
+  --color-surface-raised: hsl(0, 0%, 100%);
   
   --radius-sm: 0.5rem;
   --radius-md: 1rem;
@@ -48,7 +49,7 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 antialiased;
+    @apply bg-stone-100 text-stone-900 antialiased;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   }
 }
@@ -63,11 +64,11 @@
   }
   
   .glass-card {
-    @apply bg-[var(--color-surface-raised)]/80 backdrop-blur-md border border-white/10 rounded-xl;
+    @apply bg-white/90 backdrop-blur-md border border-stone-200/50 rounded-2xl shadow-sm;
   }
   
   .skeleton-shimmer {
-    @apply bg-[var(--color-surface-raised)] relative overflow-hidden;
+    @apply bg-stone-200 relative overflow-hidden;
   }
   
   .skeleton-shimmer::after {
@@ -76,8 +77,8 @@
     background-image: linear-gradient(
       90deg,
       transparent 0,
-      rgba(255, 255, 255, 0.05) 20%,
-      rgba(255, 255, 255, 0.1) 60%,
+      rgba(255, 255, 255, 0.4) 20%,
+      rgba(255, 255, 255, 0.6) 60%,
       transparent
     );
     animation: shimmer 2s infinite;

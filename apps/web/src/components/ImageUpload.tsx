@@ -138,8 +138,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected, isLoading, o
   return (
     <div 
       className={`w-full max-w-md mx-auto relative rounded-2xl overflow-hidden transition-all duration-300 ${
-        dragActive ? 'scale-[1.02] shadow-emerald-500/20 ring-emerald-500' : 'ring-white/10 hover:ring-white/30 hover:bg-white/5'
-      } ring-1 bg-white/5 backdrop-blur-md`}
+        dragActive ? 'scale-[1.02] shadow-emerald-500/20 ring-emerald-500 bg-white/50 dark:bg-white/10' : 'ring-stone-200 dark:ring-white/10 hover:ring-emerald-300 dark:hover:ring-white/30 hover:bg-white/60 dark:hover:bg-white/5 bg-white/40 dark:bg-white/5'
+      } ring-1 backdrop-blur-md shadow-sm`}
       onDragEnter={handleDrag}
       onDragLeave={handleDrag}
       onDragOver={handleDrag}
@@ -147,13 +147,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected, isLoading, o
     >
       <label className="flex flex-col items-center justify-center w-full h-64 cursor-pointer p-6">
         <div className="flex flex-col items-center justify-center pt-5 pb-6">
-          <div className={`p-4 rounded-full mb-4 transition-colors ${dragActive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-gray-400'}`}>
+          <div className={`p-4 rounded-full mb-4 transition-colors ${dragActive ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-stone-100 text-stone-500 dark:bg-white/5 dark:text-gray-400'}`}>
             <UploadCloud size={40} />
           </div>
-          <p className="mb-2 text-lg font-medium text-white">
-            <span className="text-emerald-400">Click to upload</span> or drag and drop
+          <p className="mb-2 text-lg font-medium text-stone-700 dark:text-white">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">Click to upload</span> or drag and drop
           </p>
-          <p className="text-sm text-gray-400 text-center">
+          <p className="text-sm text-stone-500 dark:text-gray-400 text-center">
             Upload a clear, close-up photo of a single leaf. <br/> Supported: JPG, PNG, WEBP (Max 10MB)
           </p>
         </div>
