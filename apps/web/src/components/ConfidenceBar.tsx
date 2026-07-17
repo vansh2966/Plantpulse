@@ -57,7 +57,7 @@ const ConfidenceBar: React.FC<ConfidenceBarProps> = ({ confidence }) => {
           style={{ filter: glowColor }}
         >
           <circle
-            className="text-white/10 stroke-current"
+            className="text-stone-200 dark:text-white/10 stroke-current"
             strokeWidth="8"
             cx="50"
             cy="50"
@@ -78,12 +78,12 @@ const ConfidenceBar: React.FC<ConfidenceBarProps> = ({ confidence }) => {
           />
         </svg>
         <div className="absolute flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300 tabular-nums">
+          <span className="text-2xl font-bold text-stone-800 dark:text-white tabular-nums drop-shadow-sm">
             {displayPercentage}%
           </span>
         </div>
       </div>
-      <span className={`mt-3 text-sm font-medium ${colorClass} bg-white/5 px-3 py-1 rounded-full border border-white/10`}>
+      <span className={`mt-3 text-sm font-medium ${colorClass} bg-stone-100 dark:bg-white/5 px-3 py-1 rounded-full border border-stone-200 dark:border-white/10`}>
         {label}
       </span>
     </div>

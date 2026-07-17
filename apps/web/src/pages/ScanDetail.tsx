@@ -90,11 +90,14 @@ const ScanDetail: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 p-4 md:p-8 animate-fade-in">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <SkeletonLoader type="text" className="w-48 h-8" />
-          <SkeletonLoader type="card" className="h-[400px]" />
-          <SkeletonLoader type="card" className="h-48" />
+      <div className="min-h-screen bg-stone-50 dark:bg-slate-950 p-4 md:p-8 animate-fade-in text-stone-900 dark:text-slate-100">
+        <div className="max-w-7xl mx-auto space-y-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <SkeletonLoader type="card" className="h-[500px]" />
+          <div className="space-y-6">
+            <SkeletonLoader type="card" className="h-48" />
+            <SkeletonLoader type="card" className="h-48" />
+          </div>
+          <SkeletonLoader type="card" className="h-[600px]" />
         </div>
       </div>
     );
@@ -103,31 +106,48 @@ const ScanDetail: React.FC = () => {
   if (!scan) return null;
 
   const displayName = scan.class_name.replace(/___/g, " — ").replace(/_/g, " ");
+  const cropName = scan.class_name.split('_')[0].toLowerCase();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 animate-fade-in relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-[30%] h-[30%] bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none" />
+    <div className="min-h-screen bg-stone-50 dark:bg-slate-950 text-stone-900 dark:text-slate-100 p-4 md:p-8 animate-fade-in relative overflow-hidden flex flex-col z-0">
+      {/* Background Image */}
+      <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+        <img 
+          src={`/backgrounds/${cropName}.png`} 
+          alt={`${cropName} Field Background`} 
+          className="absolute inset-0 w-full h-full object-cover opacity-100"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/home-bg.png';
+          }}
+        />
+        <div className="absolute inset-0 bg-stone-100/10 dark:bg-slate-950/70 transition-colors duration-300" />
+      </div>
+
+      <div className="absolute top-0 right-0 w-[30%] h-[30%] bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none z-0" />
       
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto w-full relative z-10 flex-1">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Link to="/history" className="p-2 bg-white/5 hover:bg-white/10 rounded-xl transition-colors ring-1 ring-white/10">
-              <ChevronLeft size={24} className="text-slate-300" />
-            </Link>
-            <h1 className="text-2xl font-bold text-white">Scan Details</h1>
+          <div className="flex items-center gap-4 bg-white/70 dark:bg-transparent p-2 pr-6 rounded-2xl backdrop-blur-md dark:backdrop-blur-none border border-white/40 dark:border-transparent">
+            <button 
+              onClick={() => navigate('/history')}
+              className="p-3 bg-white dark:bg-slate-900/50 hover:bg-stone-100 dark:hover:bg-slate-800 rounded-xl transition-all shadow-sm border border-stone-200 dark:border-white/10 group"
+            >
+              <ChevronLeft size={24} className="text-stone-800 dark:text-slate-200 group-hover:-translate-x-1 transition-transform" />
+            </button>
+            <h1 className="text-2xl md:text-3xl font-black text-stone-900 dark:text-white drop-shadow-sm">Scan Details</h1>
           </div>
           <button
             onClick={handleDelete}
-            className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl transition-colors ring-1 ring-rose-500/20"
+            className="p-2 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 rounded-xl transition-colors ring-1 ring-rose-200 dark:ring-rose-500/20 shadow-sm dark:shadow-none"
           >
             <Trash2 size={20} />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start relative">
           {/* Image Section */}
-          <div className="glass-card overflow-hidden">
+          <div className="glass-card overflow-hidden lg:sticky lg:top-8">
             <div className="relative">
               {gradcamUrl ? (
                 /* GradCAM Comparison Slider */
@@ -206,10 +226,10 @@ const ScanDetail: React.FC = () => {
           </div>
 
           {/* Details Section */}
-          <div className="space-y-6">
+          <div className="space-y-6 lg:sticky lg:top-8">
             <div className="glass-card p-6">
-              <h2 className="text-xl font-semibold text-white mb-2">{displayName}</h2>
-              <p className="text-sm text-slate-400 mb-4">
+              <h2 className="text-xl font-semibold text-stone-800 dark:text-white mb-2">{displayName}</h2>
+              <p className="text-sm text-stone-500 dark:text-slate-400 mb-4">
                 Scanned on {new Date(scan.timestamp).toLocaleDateString('en-US', { 
                   year: 'numeric', month: 'long', day: 'numeric', 
                   hour: '2-digit', minute: '2-digit' 
@@ -221,11 +241,11 @@ const ScanDetail: React.FC = () => {
             {/* Top-K Predictions */}
             {scan.top_k && scan.top_k.length > 0 && (
               <div className="glass-card p-6">
-                <h3 className="text-lg font-medium text-white mb-4">Alternative Predictions</h3>
+                <h3 className="text-lg font-medium text-stone-800 dark:text-white mb-4">Alternative Predictions</h3>
                 <div className="space-y-3">
                   {scan.top_k.map((prediction, index) => (
                     <div key={prediction.class_name} className="flex items-center justify-between">
-                      <span className="text-sm text-slate-300">
+                      <span className="text-sm text-stone-600 dark:text-slate-300">
                         {index + 1}. {prediction.class_name.replace(/___/g, " — ").replace(/_/g, " ")}
                       </span>
                       <span className={`text-sm font-medium ${
@@ -239,14 +259,14 @@ const ScanDetail: React.FC = () => {
                 </div>
               </div>
             )}
-
-            {/* Advice Panel */}
-            {scan.advice && (
-              <div className="h-[600px] mb-8">
-                <AdvicePanel advice={scan.advice} />
-              </div>
-            )}
           </div>
+
+          {/* Advice Panel */}
+          {scan.advice && (
+            <div className="h-[600px] mb-8 lg:sticky lg:top-8">
+              <AdvicePanel advice={scan.advice} />
+            </div>
+          )}
         </div>
       </div>
     </div>

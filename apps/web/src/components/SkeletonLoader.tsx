@@ -36,5 +36,5 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
 
   if (count === 1) return elements[0];
   
-  return <div className="space-y-3">{elements}</div>;
+  return <>{elements}</>;
 };

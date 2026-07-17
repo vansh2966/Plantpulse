@@ -5,16 +5,26 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, Calendar, Leaf } from 'lucide-react';
 import { SkeletonLoader } from '../components/SkeletonLoader';
 import { useToast } from '../components/Toast';
+import { historyCache } from '../utils/cache';
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
 
 const History: React.FC = () => {
-  const [scans, setScans] = useState<ScanHistoryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [scans, setScans] = useState<ScanHistoryItem[]>(historyCache.scans || []);
+  const [isLoading, setIsLoading] = useState(!historyCache.scans);
   const { showToast } = useToast();
 
   useEffect(() => {
     const fetchHistory = async () => {
+      if (historyCache.scans && Date.now() - historyCache.lastFetchTime < CACHE_DURATION) {
+        setScans(historyCache.scans);
+        setIsLoading(false);
+        return;
+      }
       try {
         const response = await api.get<ScanHistoryResponse>('/scans');
+        historyCache.scans = response.data.scans;
+        historyCache.lastFetchTime = Date.now();
         setScans(response.data.scans);
       } catch (error) {
         console.error("Failed to fetch history:", error);
@@ -33,9 +43,9 @@ const History: React.FC = () => {
         <img 
           src="/home-bg.png" 
           alt="Agriculture Field Background" 
-          className="absolute inset-0 w-full h-full object-cover opacity-100 dark:opacity-70"
+          className="absolute inset-0 w-full h-full object-cover opacity-100"
         />
-        <div className="absolute inset-0 bg-stone-100/30 dark:bg-slate-950/60 transition-colors duration-300" />
+        <div className="absolute inset-0 bg-transparent dark:bg-slate-950/60 transition-colors duration-300" />
       </div>
 
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex-1 flex flex-col">

@@ -8,8 +8,7 @@ import CropSelector from '../components/CropSelector';
 import api from '../services/api';
 import type { PredictResponse } from '@plantpulse/shared/types/prediction';
 import { Leaf } from 'lucide-react';
-
-
+import { clearHistoryCache } from '../utils/cache';
 
 const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +34,7 @@ const Home: React.FC = () => {
       const response = await api.post<PredictResponse>('/predict', formData);
       
       setResult(response.data);
+      clearHistoryCache(); // Invalidate cache so history tab fetches the new scan
     } catch (error) {
       console.error("Error predicting image:", error);
       showToast("There was an error analyzing the image. Please try again.", "error");
@@ -62,10 +62,10 @@ const Home: React.FC = () => {
         <img 
           src="/home-bg.png" 
           alt="Agriculture Field Background" 
-          className="absolute inset-0 w-full h-full object-cover opacity-100 dark:opacity-70"
+          className="absolute inset-0 w-full h-full object-cover opacity-100"
         />
         {/* Lighter overlay to let the image shine but keep text readable */}
-        <div className="absolute inset-0 bg-stone-100/30 dark:bg-slate-950/60 transition-colors duration-300" />
+        <div className="absolute inset-0 bg-transparent dark:bg-slate-950/60 transition-colors duration-300" />
       </div>
 
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10 flex flex-col h-full flex-1 overflow-hidden">
