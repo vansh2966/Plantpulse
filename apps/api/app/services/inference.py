@@ -57,8 +57,25 @@ class InferenceService:
 
         # Fallback to PyTorch
         if not self.model_path.exists():
-            print(f"Warning: Model checkpoint not found at {self.model_path}.")
-            return
+            print(f"Warning: Model checkpoint not found at {self.model_path}. Attempting to download from S3...")
+            import boto3
+            try:
+                self.model_path.parent.mkdir(parents=True, exist_ok=True)
+                s3 = boto3.client(
+                    "s3",
+                    region_name=settings.AWS_REGION,
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                )
+                s3.download_file(
+                    settings.S3_BUCKET_NAME,
+                    "models/convnext_tiny_plantdisease.pt",
+                    str(self.model_path)
+                )
+                print(f"Successfully downloaded model weights to {self.model_path}")
+            except Exception as e:
+                print(f"Failed to download model weights from S3: {e}")
+                return
 
         try:
             checkpoint = torch.load(

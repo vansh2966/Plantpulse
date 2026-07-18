@@ -1,7 +1,11 @@
 import axios from "axios";
 import { auth } from "../config/supabase";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
+let envApiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
+if (envApiUrl && !envApiUrl.endsWith('/api/v1')) {
+  envApiUrl = envApiUrl.replace(/\/$/, '') + '/api/v1';
+}
+const API_BASE_URL = envApiUrl || "http://localhost:8000/api/v1";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
