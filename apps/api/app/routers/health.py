@@ -12,5 +12,5 @@ class HealthResponse(BaseModel):
 async def health_check():
     return HealthResponse(
         status="ok",
-        model_loaded=inference_service.model is not None
+        model_ready=inference_service.model is not None
     )
