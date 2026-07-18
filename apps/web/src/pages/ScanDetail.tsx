@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Trash2, Eye, SlidersHorizontal } from 'lucide-react';
 import { SkeletonLoader } from '../components/SkeletonLoader';
 import { useToast } from '../components/Toast';
