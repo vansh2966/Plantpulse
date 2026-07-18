@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        os.getenv("FRONTEND_URL", "https://plantpulse-web-5exc.vercel.app"),
+        os.getenv("FRONTEND_URL", "https://plantpulse-web.vercel.app"),
     ]
 
     # Supabase Auth & DB
