@@ -55,9 +55,10 @@ class InferenceService:
                 print(f"Failed to load ONNX model: {e}. Falling back to PyTorch.")
                 self.use_onnx = False
 
-        # Fallback to PyTorch
-        if not self.model_path.exists():
-            print(f"Warning: Model checkpoint not found at {self.model_path}. Attempting to download from S3...")
+        # Fallback to PyTorch. Check if it exists AND is a real model file (not a Git LFS pointer)
+        is_lfs_pointer = self.model_path.exists() and self.model_path.stat().st_size < 1024 * 1024
+        if not self.model_path.exists() or is_lfs_pointer:
+            print(f"Warning: Real model checkpoint not found at {self.model_path}. Attempting to download from S3...")
             import boto3
             try:
                 self.model_path.parent.mkdir(parents=True, exist_ok=True)
