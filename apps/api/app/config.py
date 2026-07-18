@@ -20,7 +20,11 @@ class Settings(BaseSettings):
     IMAGENET_STD: tuple = (0.229, 0.224, 0.225)
     
     # Security
-    ALLOWED_ORIGINS: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    ALLOWED_ORIGINS: list[str] = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        os.getenv("FRONTEND_URL", "https://plantpulse-web-5exc.vercel.app"),
+    ]
 
     # Supabase Auth & DB
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
