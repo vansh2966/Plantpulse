@@ -20,8 +20,13 @@ def verify_supabase_token(credentials: HTTPAuthorizationCredentials = Depends(se
         return {"sub": "dev_test_user_123", "email": "test@example.com"}
 
     try:
-        # Supabase uses HS256 by default for JWTs
-        decoded_token = jwt.decode(token, jwt_secret, algorithms=["HS256"])
+        # Supabase uses HS256 by default for JWTs. The audience is usually 'authenticated'
+        decoded_token = jwt.decode(
+            token, 
+            jwt_secret, 
+            algorithms=["HS256"], 
+            options={"verify_aud": False}
+        )
         return decoded_token
     except JWTError as e:
         raise HTTPException(
