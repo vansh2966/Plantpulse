@@ -11,6 +11,35 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
+const API_STARTUP_TIMEOUT_MS = 4 * 60 * 1000;
+const HEALTH_CHECK_TIMEOUT_MS = 20 * 1000;
+const RETRY_DELAY_MS = 3 * 1000;
+
+const wait = (milliseconds: number) =>
+  new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));
+
+/**
+ * Render's free instances sleep after inactivity. Warm the API before a
+ * non-idempotent prediction request so users do not receive a generic browser
+ * network error while the instance is starting.
+ */
+export async function waitForApiReady(): Promise<void> {
+  const deadline = Date.now() + API_STARTUP_TIMEOUT_MS;
+  let lastError: unknown;
+
+  while (Date.now() < deadline) {
+    try {
+      await api.get('/health', { timeout: HEALTH_CHECK_TIMEOUT_MS });
+      return;
+    } catch (error) {
+      lastError = error;
+      await wait(RETRY_DELAY_MS);
+    }
+  }
+
+  throw lastError ?? new Error('The analysis service did not start in time.');
+}
+
 // Automatically attach the Supabase session token to all requests if the user is logged in
 api.interceptors.request.use(async (config) => {
   const { data: { session } } = await auth.getSession();

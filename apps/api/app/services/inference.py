@@ -36,6 +36,7 @@ class InferenceService:
         self.class_names = []
         self.is_ready = False
         self.use_onnx = False
+        self.load_error = None
 
     def load_model(self):
         if self.is_ready:
@@ -49,6 +50,7 @@ class InferenceService:
                     self.class_names = json.load(f)
                 self.use_onnx = True
                 self.is_ready = True
+                self.load_error = None
                 print(f"Loaded ONNX model from {self.onnx_path}")
                 return
             except Exception as e:
@@ -75,7 +77,8 @@ class InferenceService:
                 )
                 print(f"Successfully downloaded model weights to {self.model_path}")
             except Exception as e:
-                print(f"Failed to download model weights from S3: {e}")
+                self.load_error = f"Failed to download model weights from S3: {e}"
+                print(self.load_error)
                 return
 
         try:
@@ -105,9 +108,11 @@ class InferenceService:
             self.class_names = class_names
             self.is_ready = True
             self.use_onnx = False
+            self.load_error = None
             print(f"Loaded PyTorch model from {self.model_path}")
         except Exception as e:
-            print(f"Failed to load PyTorch model from {self.model_path}: {e}")
+            self.load_error = f"Failed to load PyTorch model from {self.model_path}: {e}"
+            print(self.load_error)
             self.model = None
             self.is_ready = False
 
@@ -151,6 +156,7 @@ class InferenceService:
             
         if not self.is_ready:
             raise RuntimeError(
+                self.load_error or
                 "Model is not loaded. Please ensure model weights exist at "
                 f"{self.model_path} and restart the server."
             )

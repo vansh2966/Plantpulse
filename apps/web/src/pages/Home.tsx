@@ -5,10 +5,11 @@ import AdvicePanel from '../components/AdvicePanel';
 import { useToast } from '../components/Toast';
 import { SkeletonLoader } from '../components/SkeletonLoader';
 import CropSelector from '../components/CropSelector';
-import api from '../services/api';
+import api, { waitForApiReady } from '../services/api';
 import type { PredictResponse } from '@plantpulse/shared/types/prediction';
 import { Leaf } from 'lucide-react';
 import { clearHistoryCache } from '../utils/cache';
+import axios from 'axios';
 
 const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +24,8 @@ const Home: React.FC = () => {
     setResult(null);
     
     try {
+      await waitForApiReady();
+
       const formData = new FormData();
       formData.append('image', file);
       
@@ -37,7 +40,15 @@ const Home: React.FC = () => {
       clearHistoryCache(); // Invalidate cache so history tab fetches the new scan
     } catch (error) {
       console.error("Error predicting image:", error);
-      showToast("There was an error analyzing the image. Please try again.", "error");
+      const detail = axios.isAxiosError(error)
+        ? error.response?.data?.detail
+        : undefined;
+
+      showToast(
+        detail ||
+          "The analysis service is starting or unavailable. Please try again in a moment.",
+        "error"
+      );
     } finally {
       setIsLoading(false);
     }
